@@ -11,7 +11,7 @@ idna==2.10
 iniconfig==1.1.1
 itsdangerous==1.1.0
 Jinja2==2.11.3
-JPype1 @ file:///C:/Users/giyu1/Downloads/JPype1-1.2.0-cp38-cp38-win_amd64.whl
+JPype1==1.2.0
 jsonschema==3.2.0
 MarkupSafe==2.0.1
 numpy==1.20.3

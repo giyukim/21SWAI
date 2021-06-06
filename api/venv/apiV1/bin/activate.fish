@@ -29,7 +29,7 @@ end
 # unset irrelevant variables
 deactivate nondestructive
 
-set -gx VIRTUAL_ENV "/home/swai21-gyk/apiV1"
+set -gx VIRTUAL_ENV "/home/swai21-gyk/21SWAI/api/venv/apiV1"
 
 set -gx _OLD_VIRTUAL_PATH $PATH
 set -gx PATH "$VIRTUAL_ENV/bin" $PATH

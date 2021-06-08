@@ -1,4 +1,4 @@
-from re import I
+from re import I, S
 from flask import Flask, request, Response, jsonify
 from flask_restx import Resource, Api
 import pymysql
@@ -25,7 +25,7 @@ api = Api(app)
 class Users(Resource):
     def get(self, username, password):
         if username != "" and password != "":
-            sql = "SELECT EXISTS (SELECT id FROM users WHERE username=\"" + username + "\")"
+            sql = "SELECT EXISTS (SELECT id FROM users WHERE username=\"" + str(username) + "\")"
             cursor.execute(sql)
             result_data_exist = cursor.fetchall()[0][0]
             if result_data_exist == 0:
@@ -34,14 +34,14 @@ class Users(Resource):
                 }
                 return Response(status = 404)
             elif result_data_exist == 1:
-                sql = "SELECT password FROM users WHERE username = \"" + username + "\""
+                sql = "SELECT password FROM users WHERE username = \"" + str(username) + "\""
                 cursor.execute(sql)
                 result_data_password = cursor.fetchall()[0][0]
                 if result_data_password == password:
-                    sql = "SELECT id FROM users WHERE username = \"" + username + "\""
+                    sql = "SELECT id FROM users WHERE username = \"" + str(username) + "\""
                     cursor.execute(sql)
                     result_data_id = cursor.fetchall()[0][0]
-                    sql = "SELECT token FROM users WHERE id = \"" + result_data_id + "\""
+                    sql = "SELECT token FROM users WHERE id = " + int(result_data_id)
                     cursor.execute(sql)
                     result_data_usertoken = cursor.fetchall()[0][0]
                     return_json = {
@@ -69,7 +69,7 @@ class Users(Resource):
                     "msg": "password and password confirm is not coincident"
                 }
                 return Response(repsonse = jsonify(return_json), status = 400)
-            sql = "SELECT EXISTS (SELECT id FROM users WHERE username = \"" + username + "\")"
+            sql = "SELECT EXISTS (SELECT id FROM users WHERE username = \"" + str(username) + "\")"
             cursor.execute(sql)
             result_data_userexist = cursor.fetchall()[0][0]
             if result_data_userexist == 1:
@@ -93,29 +93,31 @@ class Users(Resource):
 class Userssim(Resource):
     def get(self, userid, usertoken):
         if userid != "" and usertoken != "":
-            sql = "SELECT EXISTS (SELECT token FROM users WHERE id = \"" + int(userid) + "\")"
+            sql = "SELECT EXISTS (SELECT token FROM users WHERE id = " + int(userid) + ")"
             cursor.execute(sql)
             result_data_userexist = cursor.fetchall()[0][0]
             if result_data_userexist == 1:
-                sql = "SELECT token FROM users WHERE id = \"" + int(userid) + "\")"
+                sql = "SELECT token FROM users WHERE id = " + int(userid) + ")"
                 cursor.execute(sql)
                 result_data_usertoken = cursor.fetchall()[0][0]
                 if result_data_usertoken == usertoken:
-                    sql = "SELECT username FROM users WHERE id = \"" + userid + "\""
+                    sql = "SELECT username FROM users WHERE id = " + int(userid)
                     cursor.execute(sql)
                     result_data_username = cursor.fetchall()[0][0]
-                    sql = "SELECT token FROM users WHERE id = \"" + userid + "\""
+                    sql = "SELECT token FROM users WHERE id = " + int(userid)
                     cursor.execute(sql)
                     result_data_token = cursor.fetchall()[0][0]
-                    sql = "SELECT stocklist FROM users WHERE id = \"" + userid + "\""
+                    sql = "SELECT stocklist FROM users WHERE id = " + int(userid)
                     cursor.execute(sql)
                     result_data_stocklist = list(cursor.fetchall()[0][0].split("|"))
-                    
+                    stock_data = []
+                    for stockcode in result_data_stocklist:
+                        stock_data.append(str(stockcode))
                     return_json = {
                         "id": int(userid),
                         "username": str(result_data_username),
                         "token": str(result_data_token),
-                        "stocklist": result_data_stocklist
+                        "stocklist": stock_data
                     }
                     return Response(response = jsonify(return_json), status = 200)
                 else:
@@ -136,16 +138,16 @@ class Userssim(Resource):
 
     def put(self, userid, usertoken, username, password, password2):
         if userid != "" and usertoken != "" and username != "" and password != "" and password2 != "":
-            sql = "SELECT EXISTS (SELECT username FROM users WHERE id = \"" + int(userid) + "\")"
+            sql = "SELECT EXISTS (SELECT username FROM users WHERE id = " + int(userid) + ")"
             cursor.execute(sql)
             result_data_userexist = cursor.fetchall()[0][0]
             if result_data_userexist == 1:
-                sql = "SELECT token FROM users WHERE id = \"" + userid + "\""
+                sql = "SELECT token FROM users WHERE id = " + int(userid)
                 cursor.execute(sql)
                 result_data_dbusertoken = cursor.fetchall()[0][0]
                 if usertoken == result_data_dbusertoken:
                     new_usertoken = (hashlib.sha256((str(username) + str(password)).encode())).hexdigest()
-                    sql = "UPDATE users SET username = \"" + username + "\", token = \"" + new_usertoken + "\", password = \"" + password + " WHERE id = \"" + userid + "\""
+                    sql = "UPDATE users SET username = \"" + str(username) + "\", token = \"" + str(new_usertoken) + "\", password = \"" + str(password) + " WHERE id = " + int(userid)
                     cursor.execute(sql)
                     db.commit()
                     return Response(status = 204)
@@ -164,18 +166,18 @@ class Userssim(Resource):
         
     def patch(self, userid, usertoken, username, password, password2):
         if userid != "" and usertoken != "":
-            sql = "SELECT EXISTS (SELECT username FROM users WHERE id = \"" + int(userid) + "\")"
+            sql = "SELECT EXISTS (SELECT username FROM users WHERE id = " + int(userid) + ")"
             cursor.execute(sql)
             result_data_userexist = cursor.fetchall()[0][0]
             if result_data_userexist == 1:
-                sql = "SELECT token FROM users WHERE id = \"" + userid + "\""
+                sql = "SELECT token FROM users WHERE id = " + int(userid)
                 cursor.execute(sql)
                 result_data_dbusertoken = cursor.fetchall()[0][0]
                 if usertoken == result_data_dbusertoken:
                     if password != "" and password != "":
                         if password == password2:
                             new_usertoken = (hashlib.sha256((str(username) + str(password)).encode())).hexdigest()
-                            sql = "UPDATE users SET password = \"" + password + "\", token = \"" + new_usertoken + "\" WHERE id = \"" + userid + "\""
+                            sql = "UPDATE users SET password = \"" + str(password) + "\", token = \"" + str(new_usertoken) + "\" WHERE id = " + int(userid)
                             cursor.execute(sql)
                             db.commit()
                         else:
@@ -195,7 +197,7 @@ class Userssim(Resource):
                         return Response(response = return_json, status = 400)
                     if username != "":
                         new_usertoken = (hashlib.sha256((str(username) + str(password)).encode())).hexdigest()
-                        sql = "UPDATE users SET username = \"" + username + "\", token = \"" + new_usertoken + "\" WHERE id = \"" + userid + "\""
+                        sql = "UPDATE users SET username = \"" + str(username) + "\", token = \"" + str(new_usertoken) + "\" WHERE id = " + int(userid)
                         cursor.execute(sql)
                         db.commit()
                     return Response(status = 204)
@@ -214,11 +216,30 @@ class Userssim(Resource):
 
     def delete(self, userid, usertoken): 
         if userid != "" and usertoken != "":
-            
+            sql = "SELECT EXISTS (SELECT usertoken FROM users WHERE id = " + int(userid) + ")"
+            cursor.execute(sql)
+            result_data_userexist = cursor.fetchall()[0][0]
+            if result_data_userexist == 1:
+                sql = "SELECT usertoken FROM uses WHERE id = " + int(userid)
+                cursor.execute(sql)
+                result_data_usertoken = cursor.fetchall()[0][0]
+                if result_data_usertoken == usertoken:
+                    sql = "DELETE FROM users WHERE id = " + int(userid)
+                    cursor.execute(sql)
+                    db.commit()
+                    return Response(status = 204)
+                else:
+                    return_json = {
+                        "msg": "Token error"
+                    }
+                    return Response(response = jsonify(return_json), status = 400)
+            else:
+                return Response(status = 404)
         else:
-            
-    
-
+            return_json = {
+                "msg": "parameter(s) have(has) NULL data"
+            }
+            return Response(response = jsonify(return_json), status = 400)
 
 if __name__ == "__main__":
     app.run(debug = True, host = "0.0.0.0", port = 5000) 

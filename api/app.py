@@ -1,11 +1,12 @@
-from re import I, S
-from flask import Flask, request, Response, jsonify
+from flask import Flask, Response, jsonify
 from flask_restx import Resource, Api
 import pymysql
 import os
 import datetime
 import random
 import hashlib
+
+from werkzeug.datastructures import ResponseCacheControl
 
 api_version = "V1"
 
@@ -28,12 +29,12 @@ class Users(Resource):
             sql = "SELECT EXISTS (SELECT id FROM users WHERE username=\"" + str(username) + "\")"
             cursor.execute(sql)
             result_data_exist = cursor.fetchall()[0][0]
-            if result_data_exist == 0:
+            if int(result_data_exist) == 0:
                 return_json = {
                     "msg": "User not exists"
                 }
                 return Response(status = 404)
-            elif result_data_exist == 1:
+            else:
                 sql = "SELECT password FROM users WHERE username = \"" + str(username) + "\""
                 cursor.execute(sql)
                 result_data_password = cursor.fetchall()[0][0]
@@ -41,13 +42,9 @@ class Users(Resource):
                     sql = "SELECT id FROM users WHERE username = \"" + str(username) + "\""
                     cursor.execute(sql)
                     result_data_id = cursor.fetchall()[0][0]
-                    sql = "SELECT token FROM users WHERE id = " + int(result_data_id)
-                    cursor.execute(sql)
-                    result_data_usertoken = cursor.fetchall()[0][0]
                     return_json = {
                         "id" : result_data_id,
-                        "username" : username,
-                        "token" : result_data_usertoken
+                        "username" : username
                     }
                     return Response(response = jsonify(return_json), status = 200)
                 elif result_data_password != password:
@@ -57,7 +54,7 @@ class Users(Resource):
                     return Response(status = 404)
         else:
             return_json = {
-                "msg": "parameter(s) have(has) NULL data"
+                "msg": "Parameter Error"
             }
             return Response(response = jsonify(return_json), status = 400)
 
@@ -78,168 +75,230 @@ class Users(Resource):
                 }
                 return Response(response = jsonify(return_json), status = 404)
             else:
-                usertoken = (hashlib.sha256((str(username) + str(password)).encode())).hexdigest()
-                sql = "INSERT INTO users(username, token, password) VALUES(\"" + str(username) + "\", \"" + str(usertoken) + "\", \"" + str(password) + "\")"
+                sql = "INSERT INTO users(username, password) VALUES(\"" + str(username) + "\", \"" + str(password) + "\")"
                 cursor.execute(sql)
                 db.commit()
                 return Response(status = 201)
         else:
             return_json = {
-                "msg": "parameter(s) have(has) NULL data"
+                "msg": "Parameter Error"
             }
             return Response(response = jsonify(return_json), status = 400)
 
-@api.route("/" + api_version + "/users/<int:userid>?token=<str:usertoken>&username=<str:username>&password=<str:password>&passwordtoken=<str:password2>")
-class Userssim(Resource):
-    def get(self, userid, usertoken):
-        if userid != "" and usertoken != "":
-            sql = "SELECT EXISTS (SELECT token FROM users WHERE id = " + int(userid) + ")"
+@api.route("/" + api_version + "/users/<int:userid>?username=<str:username>&password=<str:password>&passwordconfirm=<str:password2>")
+class Usersid(Resource):
+    def get(self, userid):
+        sql = "SELECT EXISTS (SELECT username FROM users WHERE id = " + int(userid) + ")"
+        cursor.execute(sql)
+        result_data_userexist = cursor.fetchall()[0][0]
+        if result_data_userexist == 1:
+            sql = "SELECT username FROM users WHERE id = " + int(userid)
             cursor.execute(sql)
-            result_data_userexist = cursor.fetchall()[0][0]
-            if result_data_userexist == 1:
-                sql = "SELECT token FROM users WHERE id = " + int(userid) + ")"
-                cursor.execute(sql)
-                result_data_usertoken = cursor.fetchall()[0][0]
-                if result_data_usertoken == usertoken:
-                    sql = "SELECT username FROM users WHERE id = " + int(userid)
-                    cursor.execute(sql)
-                    result_data_username = cursor.fetchall()[0][0]
-                    sql = "SELECT token FROM users WHERE id = " + int(userid)
-                    cursor.execute(sql)
-                    result_data_token = cursor.fetchall()[0][0]
-                    sql = "SELECT stocklist FROM users WHERE id = " + int(userid)
-                    cursor.execute(sql)
-                    result_data_stocklist = list(cursor.fetchall()[0][0].split("|"))
-                    stock_data = []
-                    for stockcode in result_data_stocklist:
-                        stock_data.append(str(stockcode))
-                    return_json = {
-                        "id": int(userid),
-                        "username": str(result_data_username),
-                        "token": str(result_data_token),
-                        "stocklist": stock_data
-                    }
-                    return Response(response = jsonify(return_json), status = 200)
-                else:
-                    return_json = {
-                        "msg": "User token incorrect with userid"
-                    }
-                    return Response(response = jsonify(return_json), status = 400)
-            else:
-                return_json = {
-                    "msg": "User not exists"
-                }
-                return Response(response = jsonify(return_json), status = 404)
+            result_data_username = cursor.fetchall()[0][0]
+            sql = "SELECT stocklist FROM users WHERE id = " + int(userid)
+            cursor.execute(sql)
+            result_data_stocklist = list(cursor.fetchall()[0][0].split("|"))
+            stock_data = []
+            for stockcode in result_data_stocklist:
+                stock_data.append(str(stockcode))
+            return_json = {
+                "id": int(userid),
+                "username": str(result_data_username),
+                "stocklist": stock_data
+            }
+            return Response(response = jsonify(return_json), status = 200)
         else:
             return_json = {
-                "msg": "parameter(s) have(has) NULL data"
+                "msg": "User not exists"
             }
-            return Response(response = jsonify(return_json), status = 400)
+            return Response(response = jsonify(return_json), status = 404)
 
-    def put(self, userid, usertoken, username, password, password2):
-        if userid != "" and usertoken != "" and username != "" and password != "" and password2 != "":
+    def put(self, userid, username, password, password2):
+        if username != "" and password != "" and password2 != "":
             sql = "SELECT EXISTS (SELECT username FROM users WHERE id = " + int(userid) + ")"
             cursor.execute(sql)
             result_data_userexist = cursor.fetchall()[0][0]
             if result_data_userexist == 1:
-                sql = "SELECT token FROM users WHERE id = " + int(userid)
+                sql = "UPDATE users SET username = \"" + str(username) + "\", password = \"" + str(password) + " WHERE id = " + int(userid)
                 cursor.execute(sql)
-                result_data_dbusertoken = cursor.fetchall()[0][0]
-                if usertoken == result_data_dbusertoken:
-                    new_usertoken = (hashlib.sha256((str(username) + str(password)).encode())).hexdigest()
-                    sql = "UPDATE users SET username = \"" + str(username) + "\", token = \"" + str(new_usertoken) + "\", password = \"" + str(password) + " WHERE id = " + int(userid)
-                    cursor.execute(sql)
-                    db.commit()
-                    return Response(status = 204)
-                else:
-                    return_json = {
-                        "msg": "Token error"
-                    }
-                    return Response(response = jsonify(return_json), status = 400)
+                db.commit()
+                return Response(status = 204)
             else:
                 return Response(status = 404)
         else:
             return_json = {
-                "msg": "parameter(s) have(has) NULL data"
+                "msg": "Parameter Error"
             }
             return Response(response = jsonify(return_json), status = 400)
         
-    def patch(self, userid, usertoken, username, password, password2):
-        if userid != "" and usertoken != "":
+    def patch(self, userid, username, password, password2):
+        sql = "SELECT EXISTS (SELECT username FROM users WHERE id = " + int(userid) + ")"
+        cursor.execute(sql)
+        result_data_userexist = cursor.fetchall()[0][0]
+        if result_data_userexist == 1:
+            if password != "" and password2 != "":
+                if password == password2:
+                    sql = "UPDATE users SET password = \"" + str(password) + "\" WHERE id = " + int(userid)
+                    cursor.execute(sql)
+                    db.commit()
+                else:
+                    return_json = {
+                        "msg": "password and password confirm incorrect"
+                    }
+                    return Response(response = return_json, status = 400)
+            elif password != "" and password2 == "":
+                return_json = {
+                        "msg": "password parameter is blank"
+                }
+                return Response(response = return_json, status = 400)
+            elif password == "" and password2 != "":
+                return_json = {
+                        "msg": "password confirm parameter is blank"
+                }
+                return Response(response = return_json, status = 400)
+            if username != "":
+                sql = "UPDATE users SET username = \"" + str(username) + "\" WHERE id = " + int(userid)
+                cursor.execute(sql)
+                db.commit()
+            return Response(status = 204)
+        else:
+            return Response(status = 404)
+
+    def delete(self, userid): 
+        sql = "SELECT EXISTS (SELECT username FROM users WHERE id = " + int(userid) + ")"
+        cursor.execute(sql)
+        result_data_userexist = cursor.fetchall()[0][0]
+        if result_data_userexist == 1:
+            sql = "DELETE FROM users WHERE id = " + int(userid)
+            cursor.execute(sql)
+            db.commit()
+            return Response(status = 204)
+        else:
+            return Response(status = 404)
+
+@api.route("/" + api_version + "/users/<int:userid>/stocks")
+class Usersstocks(Resource):
+    def get(self, userid):
+        sql = "SELECT EXISTS (SELECT username FROM users WHERE id = " + int(userid) + ")"
+        cursor.execute(sql)
+        result_data_userexist = cursor.fetchall()[0][0]
+        if int(result_data_userexist) == 1:
+            sql = "SELECT stocklist FROM users WHERE id = " + int(userid) + ")"
+            cursor.execute(sql)
+            return_data_stocklist = str(cursor.fetchall()[0][0]).split("[|]")
+            return_json = {
+                "stocklist": return_data_stocklist
+            }
+            return Response(response = jsonify(return_json), status = 200)
+        else:
+            return Response(status = 404)
+
+    def delete(self, userid):
+        sql = "SELECT EXISTS (SELECT username FROM users WHERE id = " + int(userid) + ")"
+        cursor.execute(sql)
+        result_data_userexist = cursor.fetchall()[0][0]
+        if int(result_data_userexist) == 1:
+            sql = "UPDATE users SET stocklist = NULL WHERE id = " + int(userid)
+            cursor.execute(sql)
+            db.commit()
+        else:
+            return Response(status = 404)
+
+@api.route("/" + api_version +  "/users/<int:userid>/stocks/<str:stockcode>")
+class Usersuseridstocksstockcode(Resource):
+    def patch(self, userid, stockcode):
+        if stockcode != "":
             sql = "SELECT EXISTS (SELECT username FROM users WHERE id = " + int(userid) + ")"
             cursor.execute(sql)
             result_data_userexist = cursor.fetchall()[0][0]
             if result_data_userexist == 1:
-                sql = "SELECT token FROM users WHERE id = " + int(userid)
+                sql = "SELECT stocklist FROM users WHERE id = " + int(userid) + ")"
                 cursor.execute(sql)
-                result_data_dbusertoken = cursor.fetchall()[0][0]
-                if usertoken == result_data_dbusertoken:
-                    if password != "" and password != "":
-                        if password == password2:
-                            new_usertoken = (hashlib.sha256((str(username) + str(password)).encode())).hexdigest()
-                            sql = "UPDATE users SET password = \"" + str(password) + "\", token = \"" + str(new_usertoken) + "\" WHERE id = " + int(userid)
-                            cursor.execute(sql)
-                            db.commit()
-                        else:
-                            return_json = {
-                                "msg": "password and password confirm incorrect"
-                            }
-                            return Response(response = return_json, status = 400)
-                    elif password != "" and password2 == "":
-                        return_json = {
-                                "msg": "password parameter is blank"
-                        }
-                        return Response(response = return_json, status = 400)
-                    elif password == "" and password2 != "":
-                        return_json = {
-                                "msg": "password confirm parameter is blank"
-                        }
-                        return Response(response = return_json, status = 400)
-                    if username != "":
-                        new_usertoken = (hashlib.sha256((str(username) + str(password)).encode())).hexdigest()
-                        sql = "UPDATE users SET username = \"" + str(username) + "\", token = \"" + str(new_usertoken) + "\" WHERE id = " + int(userid)
-                        cursor.execute(sql)
-                        db.commit()
-                    return Response(status = 204)
-                else:
+                result_data_stocklist = str(cursor.fetchall()[0][0])
+                stocklist_listed = result_data_stocklist.split("[|]")
+                if str(stockcode) in stocklist_listed:
                     return_json = {
-                        "msg": "Token error"
+                        "msg": "Stock code exist"
                     }
                     return Response(response = jsonify(return_json), status = 400)
+                else:
+                    result_data_stocklist = result_data_stocklist + "[|]" + str(stockcode)
+                    sql = "UPDATE uers SET stocklist = \"" + result_data_stocklist + "\" WHERE id = " + int(userid)
+                    return Response(status = 204)
             else:
                 return Response(status = 404)
         else:
             return_json = {
-                "msg": "parameter(s) have(has) NULL data"
+                "msg": "Parameter Error"
             }
             return Response(response = jsonify(return_json), status = 400)
 
-    def delete(self, userid, usertoken): 
-        if userid != "" and usertoken != "":
-            sql = "SELECT EXISTS (SELECT usertoken FROM users WHERE id = " + int(userid) + ")"
+    def delete(self, userid, stockcode):
+        if stockcode != "":
+            sql = "SELECT EXISTS (SELECT username FROM users WHERE id = " + int(userid) + ")"
             cursor.execute(sql)
             result_data_userexist = cursor.fetchall()[0][0]
             if result_data_userexist == 1:
-                sql = "SELECT usertoken FROM uses WHERE id = " + int(userid)
+                sql = "SELECT stocklist FROM users WHERE id = " + int(userid) + ")"
                 cursor.execute(sql)
-                result_data_usertoken = cursor.fetchall()[0][0]
-                if result_data_usertoken == usertoken:
-                    sql = "DELETE FROM users WHERE id = " + int(userid)
-                    cursor.execute(sql)
-                    db.commit()
+                result_data_stocklist = str(cursor.fetchall()[0][0])
+                stocklist_listed = result_data_stocklist.split("[|]")
+                if str(stockcode) in stocklist_listed:
+                    stocklist_deleted = result_data_stocklist.replace("[|]" + str(stockcode) + "[|]", "[|]")
+                    sql = "UPDATE uers SET stocklist = \"" + stocklist_deleted + "\" WHERE id = " + int(userid)
                     return Response(status = 204)
                 else:
-                    return_json = {
-                        "msg": "Token error"
-                    }
-                    return Response(response = jsonify(return_json), status = 400)
+                    return Response(status = 404)
             else:
                 return Response(status = 404)
         else:
             return_json = {
-                "msg": "parameter(s) have(has) NULL data"
+                "msg": "Parameter Error"
             }
             return Response(response = jsonify(return_json), status = 400)
 
+@api.route("/" + api_version + "/stocks")
+class Stocks(Resource): 
+    def get(self):
+        sql = "SELECT stockcode FROM stock_data"
+        cursor.execute(sql)
+        result_data_stockcodelist = cursor.fetchall()
+        # stockcodelist
+        # if no stockcode in table
+        # return 204
+        return_json = {
+
+        }
+        return Response(response = jsonify(return_json), status = 200)
+
+@api.route("/" + api_version + "/stocks/<str:stockcode>")
+class Stockstockcode(Resource):
+    def get(self, stockcode):
+        sql = "SELECT * FROM stock_data WHERE stockcode = \"" + str(stockcode) + "\""
+        cursor.execute(sql)
+        result_data_stockdata = cursor.fetchall()
+        # stock data anayze
+        # if no opinion in table
+        # return 204
+        return_json = {
+
+        }
+        return Response(resonpse = jsonify(return_json), status = 200)
+
+    def post(self, stockcode):
+        sql = "SELECT EXISTS (SELECT id FROM stock_data WHERE stockcode = \"" + str(stockcode) + "\")"
+        cursor.execute(sql)
+        result_data_stockexist = cursor.fetchall()[0][0]
+        if int(result_data_stockexist) == 1:
+            sql = "INSERT INTO stock_data(stockcode, opinion) VALUES(\"" + str(stockcode) + "\", " + 0 + ")"
+            cursor.execute(sql)
+            db.commit()
+            return Response(status = 201)
+        else:
+            return_json = {
+                "msg": "Stock code already exists"
+            }
+            return Response(respones = jsonify(return_json), status = 400)
+ 
 if __name__ == "__main__":
-    app.run(debug = True, host = "0.0.0.0", port = 5000) 
+    app.run(debug = True, host = "0.0.0.0", port = 5000)

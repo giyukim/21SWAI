@@ -1,0 +1,141 @@
+API Reference
+  Request URL
+    https://swaiapi.jgamgyul.kr/V1
+	
+  URI
+      /users
+        GET
+	      Log in (Must request all parameters)
+	  
+	      Parameters
+	        username : username
+	        password : SHA-256 hashed password
+			
+		  Return (json)
+		    id
+			username
+	
+		POST
+		  Sing up (Must request all parameters)
+		  
+		  Parameters
+			username : username
+			password : SHA-256 hashed password
+			passwordconfirm : SHA-256 hashed password
+	
+	  /users/{userid}
+		GET
+		  Obtain user information
+		  
+		  Return (json)
+		    id
+			stocklist
+		
+		PUT
+		  Modify user information (Must request all parameters)
+		  
+		  Parameters
+			username : username
+			password : SHA-256 hashed password
+			passwordconfirm : SHA-256 hashed password
+		
+		PATCH
+		  Modify user information
+		  
+		  Parameters
+			username : username
+			password : SHA-256 hashed password
+			passwordconfirm : SHA-256 hashed password
+		
+		DELETE
+		  Delete user information
+	  
+	  /users/{userid}/stocks
+	    GET
+		  Get stock list of user
+		  
+		  Return (json)
+		    stocklist
+		  
+		DELETE
+		  Delete all stock list of user
+	  
+	  /users/{userid}/stocks/{stockcode}
+		PATCH
+		  Add stockcodes to table
+		
+		DELETE
+		  Delete stockcode from table
+			
+	  /stocks
+	    GET
+		  Get all stock code and id
+		  
+		  Return (json)
+		    stocklist
+	  
+	  /stocks/{stockcode}
+		GET
+		  Get stock data
+		  
+		  Return (json)
+		    id
+			stockcode
+			ml
+			nlp
+			ma520
+			ma2060
+			macd12269
+			stcstc93
+			rsi14
+			bb202
+			evlp2065
+			cci14
+			dmi14
+			obv14
+			opinion
+		    
+		POST
+		  Add stock code to database table (ONLY add CODE)
+		  
+		PUT
+		  Edit stock data (Must request all parameters)
+		  
+		  Parameters
+		    stockcode
+			ml
+			nlp
+			ma520
+			ma2060
+			macd12269
+			stcstc93
+			rsi14
+			bb202
+			evlp2065
+			cci14
+			dmi14
+			obv14
+			opinion
+		  
+		PATCH
+		  Edit stock data
+		  
+		  Parameters
+		    stockcode
+			ml
+			nlp
+			ma520
+			ma2060
+			macd12269
+			stcstc93
+			rsi14
+			bb202
+			evlp2065
+			cci14
+			dmi14
+			obv14
+			opinion
+		  
+		DELETE
+		  Delete stock code
+	  

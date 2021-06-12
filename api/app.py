@@ -88,14 +88,14 @@ class Users(Resource):
 @api.route("/" + api_version + "/users/<int:userid>?username=<str:username>&password=<str:password>&passwordconfirm=<str:password2>")
 class Usersid(Resource):
     def get(self, userid):
-        sql = "SELECT EXISTS (SELECT username FROM users WHERE id = " + int(userid) + ")"
+        sql = "SELECT EXISTS (SELECT username FROM users WHERE id = " + str(userid) + ")"
         cursor.execute(sql)
         result_data_userexist = cursor.fetchall()[0][0]
         if result_data_userexist == 1:
-            sql = "SELECT username FROM users WHERE id = " + int(userid)
+            sql = "SELECT username FROM users WHERE id = " + str(userid)
             cursor.execute(sql)
             result_data_username = cursor.fetchall()[0][0]
-            sql = "SELECT stocklist FROM users WHERE id = " + int(userid)
+            sql = "SELECT stocklist FROM users WHERE id = " + str(userid)
             cursor.execute(sql)
             result_data_stocklist = list(cursor.fetchall()[0][0].split("|"))
             stock_data = []
@@ -115,11 +115,11 @@ class Usersid(Resource):
 
     def put(self, userid, username, password, password2):
         if username != "" and password != "" and password2 != "":
-            sql = "SELECT EXISTS (SELECT username FROM users WHERE id = " + int(userid) + ")"
+            sql = "SELECT EXISTS (SELECT username FROM users WHERE id = " + str(userid) + ")"
             cursor.execute(sql)
             result_data_userexist = cursor.fetchall()[0][0]
             if result_data_userexist == 1:
-                sql = "UPDATE users SET username = \"" + str(username) + "\", password = \"" + str(password) + " WHERE id = " + int(userid)
+                sql = "UPDATE users SET username = \"" + str(username) + "\", password = \"" + str(password) + " WHERE id = " + str(userid)
                 cursor.execute(sql)
                 db.commit()
                 return Response(status = 204)
@@ -132,13 +132,13 @@ class Usersid(Resource):
             return Response(response = jsonify(return_json), status = 400)
         
     def patch(self, userid, username, password, password2):
-        sql = "SELECT EXISTS (SELECT username FROM users WHERE id = " + int(userid) + ")"
+        sql = "SELECT EXISTS (SELECT username FROM users WHERE id = " + str(userid) + ")"
         cursor.execute(sql)
         result_data_userexist = cursor.fetchall()[0][0]
         if result_data_userexist == 1:
             if password != "" and password2 != "":
                 if password == password2:
-                    sql = "UPDATE users SET password = \"" + str(password) + "\" WHERE id = " + int(userid)
+                    sql = "UPDATE users SET password = \"" + str(password) + "\" WHERE id = " + str(userid)
                     cursor.execute(sql)
                     db.commit()
                 else:
@@ -157,7 +157,7 @@ class Usersid(Resource):
                 }
                 return Response(response = return_json, status = 400)
             if username != "":
-                sql = "UPDATE users SET username = \"" + str(username) + "\" WHERE id = " + int(userid)
+                sql = "UPDATE users SET username = \"" + str(username) + "\" WHERE id = " + str(userid)
                 cursor.execute(sql)
                 db.commit()
             return Response(status = 204)
@@ -165,11 +165,11 @@ class Usersid(Resource):
             return Response(status = 404)
 
     def delete(self, userid): 
-        sql = "SELECT EXISTS (SELECT username FROM users WHERE id = " + int(userid) + ")"
+        sql = "SELECT EXISTS (SELECT username FROM users WHERE id = " + str(userid) + ")"
         cursor.execute(sql)
         result_data_userexist = cursor.fetchall()[0][0]
         if result_data_userexist == 1:
-            sql = "DELETE FROM users WHERE id = " + int(userid)
+            sql = "DELETE FROM users WHERE id = " + str(userid)
             cursor.execute(sql)
             db.commit()
             return Response(status = 204)
@@ -179,7 +179,7 @@ class Usersid(Resource):
 @api.route("/" + api_version + "/users/<int:userid>/stocks")
 class Usersstocks(Resource):
     def get(self, userid):
-        sql = "SELECT EXISTS (SELECT username FROM users WHERE id = " + int(userid) + ")"
+        sql = "SELECT EXISTS (SELECT username FROM users WHERE id = " + str(userid) + ")"
         cursor.execute(sql)
         result_data_userexist = cursor.fetchall()[0][0]
         if int(result_data_userexist) == 1:
@@ -194,11 +194,11 @@ class Usersstocks(Resource):
             return Response(status = 404)
 
     def delete(self, userid):
-        sql = "SELECT EXISTS (SELECT username FROM users WHERE id = " + int(userid) + ")"
+        sql = "SELECT EXISTS (SELECT username FROM users WHERE id = " + str(userid) + ")"
         cursor.execute(sql)
         result_data_userexist = cursor.fetchall()[0][0]
         if int(result_data_userexist) == 1:
-            sql = "UPDATE users SET stocklist = NULL WHERE id = " + int(userid)
+            sql = "UPDATE users SET stocklist = NULL WHERE id = " + str(userid)
             cursor.execute(sql)
             db.commit()
         else:
@@ -208,11 +208,11 @@ class Usersstocks(Resource):
 class Usersuseridstocksstockcode(Resource):
     def patch(self, userid, stockcode):
         if stockcode != "":
-            sql = "SELECT EXISTS (SELECT username FROM users WHERE id = " + int(userid) + ")"
+            sql = "SELECT EXISTS (SELECT username FROM users WHERE id = " + str(userid) + ")"
             cursor.execute(sql)
             result_data_userexist = cursor.fetchall()[0][0]
             if result_data_userexist == 1:
-                sql = "SELECT stocklist FROM users WHERE id = " + int(userid) + ")"
+                sql = "SELECT stocklist FROM users WHERE id = " + str(userid) + ")"
                 cursor.execute(sql)
                 result_data_stocklist = str(cursor.fetchall()[0][0])
                 stocklist_listed = result_data_stocklist.split("[|]")
@@ -223,7 +223,9 @@ class Usersuseridstocksstockcode(Resource):
                     return Response(response = jsonify(return_json), status = 400)
                 else:
                     result_data_stocklist = result_data_stocklist + "[|]" + str(stockcode)
-                    sql = "UPDATE uers SET stocklist = \"" + result_data_stocklist + "\" WHERE id = " + int(userid)
+                    sql = "UPDATE uers SET stocklist = \"" + result_data_stocklist + "\" WHERE id = " + str(userid)
+                    cursor.execute(sql)
+                    db.commit()
                     return Response(status = 204)
             else:
                 return Response(status = 404)
@@ -235,17 +237,17 @@ class Usersuseridstocksstockcode(Resource):
 
     def delete(self, userid, stockcode):
         if stockcode != "":
-            sql = "SELECT EXISTS (SELECT username FROM users WHERE id = " + int(userid) + ")"
+            sql = "SELECT EXISTS (SELECT username FROM users WHERE id = " + str(userid) + ")"
             cursor.execute(sql)
             result_data_userexist = cursor.fetchall()[0][0]
             if result_data_userexist == 1:
-                sql = "SELECT stocklist FROM users WHERE id = " + int(userid) + ")"
+                sql = "SELECT stocklist FROM users WHERE id = " + str(userid) + ")"
                 cursor.execute(sql)
                 result_data_stocklist = str(cursor.fetchall()[0][0])
                 stocklist_listed = result_data_stocklist.split("[|]")
                 if str(stockcode) in stocklist_listed:
                     stocklist_deleted = result_data_stocklist.replace("[|]" + str(stockcode) + "[|]", "[|]")
-                    sql = "UPDATE uers SET stocklist = \"" + stocklist_deleted + "\" WHERE id = " + int(userid)
+                    sql = "UPDATE uers SET stocklist = \"" + str(stocklist_deleted) + "\" WHERE id = " + str(userid)
                     return Response(status = 204)
                 else:
                     return Response(status = 404)
@@ -306,8 +308,14 @@ class Stockstockcode(Resource):
         result_data_stockexist = cursor.fetchall()[0][0]
         if result_data_stockexist == 1:
             sql = "UPDATE users SET "
-
-            
+            if d_ml != None: 
+                sql = sql + "ml = " + str(d_ml) + " "
+            else:
+                sql = sql + "ml = NULL "
+            if d_nlp != None:
+                sql = sql + "ma520" + str(d_ma520) + " "
+            else:
+                sql = sql + "ma520 = NULL "
             
             sql += "WHERE stockcode = \"" + str(stockcode) + "\""
         else:

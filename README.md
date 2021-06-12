@@ -1,2 +1,1 @@
-# 21SWAI
-Project repository for SWAI
+# 2021 SWAI Project

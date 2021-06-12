@@ -313,13 +313,98 @@ class Stockstockcode(Resource):
             else:
                 sql = sql + "ml = NULL "
             if d_nlp != None:
-                sql = sql + "ma520" + str(d_ma520) + " "
+                sql = sql + "ma520 = " + str(d_ma520) + " "
             else:
                 sql = sql + "ma520 = NULL "
-            
+            if d_ma2060 != None:
+                sql = sql + "ma2060 = " = str(d_ma2060) + " "
+            else:
+                sql = sql + "ma2060 = NULL "
+            if d_macd12269 != None:
+                sql = sql + "macd12269 = " = str(d_macd12269) + " "
+            else:
+                sql = sql + "macd12269 = NULL "
+            if d_stcstc93 != None:
+                sql = sql + "stcstc93 = " = str(d_stcstc93) + " "
+            else:
+                sql = sql + "stcstc93 = NULL "
+            if d_rsi14 != None:
+                sql = sql + "rsi14 = " = str(d_rsi14) + " "
+            else:
+                sql = sql + "rsi14 = NULL "
+            if d_evlp2065 != None:
+                sql = sql + "evlp2065 = " = str(d_evlp2065) + " "
+            else:
+                sql = sql + "evlp2065 = NULL "
+            if d_cci14 != None:
+                sql = sql + "cci14 = " = str(d_cci14) + " "
+            else:
+                sql = sql + "cci14 = NULL "
+            if d_dmi14 != None:
+                sql = sql + "dmi14 = " = str(d_dmi14) + " "
+            else:
+                sql = sql + "dmi14 = NULL "
+            if d_obv14 != None:
+                sql = sql + "obv14 = " = str(d_obv14) + " "
+            else:
+                sql = sql + "obv14 = NULL "
+            if d_opinion != None:
+                sql = sql + "opinion = " = str(d_opinion) + " "
+            else:
+                sql = sql + "opinion = NULL "
             sql += "WHERE stockcode = \"" + str(stockcode) + "\""
+            cursor.execute(sql)
+            db.commit()
+            return Response(status = 204)
+        else:
+            return Response(status = 404)
+
+    def patch(self, stockcode, d_ml, d_nlp, d_ma520, d_ma2060, d_macd12269, d_stcstc93, d_rsi14, d_evlp2065, d_cci14, d_dmi14, d_obv14, d_opinion):
+        sql = "SELECT EXISTS (SELECT id FROM stock_data WHERE = \"" + stockcode + "\")"
+        cursor.execute(sql)
+        result_data_stockexist = cursor.fetchall()[0][0]
+        if result_data_stockexist == 1:
+            sql = "UPDATE users SET "
+            if d_ml != None: 
+                sql = sql + "ml = " + str(d_ml) + " "
+            if d_nlp != None:
+                sql = sql + "ma520 = " + str(d_ma520) + " "
+            if d_ma2060 != None:
+                sql = sql + "ma2060 = " = str(d_ma2060) + " "
+            if d_macd12269 != None:
+                sql = sql + "macd12269 = " = str(d_macd12269) + " "
+            if d_stcstc93 != None:
+                sql = sql + "stcstc93 = " = str(d_stcstc93) + " "
+            if d_rsi14 != None:
+                sql = sql + "rsi14 = " = str(d_rsi14) + " "
+            if d_evlp2065 != None:
+                sql = sql + "evlp2065 = " = str(d_evlp2065) + " "
+            if d_cci14 != None:
+                sql = sql + "cci14 = " = str(d_cci14) + " "
+            if d_dmi14 != None:
+                sql = sql + "dmi14 = " = str(d_dmi14) + " "
+            if d_obv14 != None:
+                sql = sql + "obv14 = " = str(d_obv14) + " "
+            if d_opinion != None:
+                sql = sql + "opinion = " = str(d_opinion) + " "
+            sql += "WHERE stockcode = \"" + str(stockcode) + "\""
+            cursor.execute(sql)
+            db.commit()
+            return Response(status = 204)
         else:
             return Response(status = 404)
  
+    def delete(self, stockcode):
+        sql = "SELECT EXISTS (SELECT id FROM stock_data WHERE = \"" + str(stockcode) + "\""
+        cursor.execute(sql)
+        result_data_stockexist = cursor.fetchall()[0][0]
+        if result_data_stockexist == 1:
+            sql = "DELETE FROM stock_data WHERE stockcode = \"" + str(stockcode) + "\"" 
+            cursor.execute(sql)
+            db.commit()
+            return Response(status = 204)
+        else:
+            return Response(status = 404)
+
 if __name__ == "__main__":
     app.run(debug = True, host = "0.0.0.0", port = 5000)

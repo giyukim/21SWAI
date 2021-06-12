@@ -271,7 +271,7 @@ class Stocks(Resource):
         }
         return Response(response = jsonify(return_json), status = 200)
 
-@api.route("/" + api_version + "/stocks/<str:stockcode>")
+@api.route("/" + api_version + "/stocks/<str:stockcode>?ml=<int:d_ml>&nlp=<int:d_nlp>&ma520=<float:d_ma520>&ma2060=<float:d_ma2060>&macd12269=<float:d_macd12269>&stcstc93=<float:d_stcstc93>&rsi14=<float:d_rsi14>&bb202=<float:d_bb202>&evlp2065=<float:d_evlp2065>&cci14=<float:d_cci14>&dmi14=<float:d_dmi14>&obv14=<float:d_obv14>&opinion=<int:d_opinion>")
 class Stockstockcode(Resource):
     def get(self, stockcode):
         sql = "SELECT * FROM stock_data WHERE stockcode = \"" + str(stockcode) + "\""
@@ -299,6 +299,19 @@ class Stockstockcode(Resource):
                 "msg": "Stock code already exists"
             }
             return Response(respones = jsonify(return_json), status = 400)
+
+    def put(self, stockcode, d_ml, d_nlp, d_ma520, d_ma2060, d_macd12269, d_stcstc93, d_rsi14, d_evlp2065, d_cci14, d_dmi14, d_obv14, d_opinion):
+        sql = "SELECT EXISTS (SELECT id FROM stock_data WHERE = \"" + stockcode + "\")"
+        cursor.execute(sql)
+        result_data_stockexist = cursor.fetchall()[0][0]
+        if result_data_stockexist == 1:
+            sql = "UPDATE users SET "
+
+            
+            
+            sql += "WHERE stockcode = \"" + str(stockcode) + "\""
+        else:
+            return Response(status = 404)
  
 if __name__ == "__main__":
     app.run(debug = True, host = "0.0.0.0", port = 5000)

@@ -317,39 +317,39 @@ class Stockstockcode(Resource):
             else:
                 sql = sql + "ma520 = NULL "
             if d_ma2060 != None:
-                sql = sql + "ma2060 = " = str(d_ma2060) + " "
+                sql = sql + "ma2060 = " + str(d_ma2060) + " "
             else:
                 sql = sql + "ma2060 = NULL "
             if d_macd12269 != None:
-                sql = sql + "macd12269 = " = str(d_macd12269) + " "
+                sql = sql + "macd12269 = " + str(d_macd12269) + " "
             else:
                 sql = sql + "macd12269 = NULL "
             if d_stcstc93 != None:
-                sql = sql + "stcstc93 = " = str(d_stcstc93) + " "
+                sql = sql + "stcstc93 = " + str(d_stcstc93) + " "
             else:
                 sql = sql + "stcstc93 = NULL "
             if d_rsi14 != None:
-                sql = sql + "rsi14 = " = str(d_rsi14) + " "
+                sql = sql + "rsi14 = " + str(d_rsi14) + " "
             else:
                 sql = sql + "rsi14 = NULL "
             if d_evlp2065 != None:
-                sql = sql + "evlp2065 = " = str(d_evlp2065) + " "
+                sql = sql + "evlp2065 = " + str(d_evlp2065) + " "
             else:
                 sql = sql + "evlp2065 = NULL "
             if d_cci14 != None:
-                sql = sql + "cci14 = " = str(d_cci14) + " "
+                sql = sql + "cci14 = " + str(d_cci14) + " "
             else:
                 sql = sql + "cci14 = NULL "
             if d_dmi14 != None:
-                sql = sql + "dmi14 = " = str(d_dmi14) + " "
+                sql = sql + "dmi14 = " + str(d_dmi14) + " "
             else:
                 sql = sql + "dmi14 = NULL "
             if d_obv14 != None:
-                sql = sql + "obv14 = " = str(d_obv14) + " "
+                sql = sql + "obv14 = " + str(d_obv14) + " "
             else:
                 sql = sql + "obv14 = NULL "
             if d_opinion != None:
-                sql = sql + "opinion = " = str(d_opinion) + " "
+                sql = sql + "opinion = " + str(d_opinion) + " "
             else:
                 sql = sql + "opinion = NULL "
             sql += "WHERE stockcode = \"" + str(stockcode) + "\""
@@ -370,23 +370,23 @@ class Stockstockcode(Resource):
             if d_nlp != None:
                 sql = sql + "ma520 = " + str(d_ma520) + " "
             if d_ma2060 != None:
-                sql = sql + "ma2060 = " = str(d_ma2060) + " "
+                sql = sql + "ma2060 = " + str(d_ma2060) + " "
             if d_macd12269 != None:
-                sql = sql + "macd12269 = " = str(d_macd12269) + " "
+                sql = sql + "macd12269 = " + str(d_macd12269) + " "
             if d_stcstc93 != None:
-                sql = sql + "stcstc93 = " = str(d_stcstc93) + " "
+                sql = sql + "stcstc93 = " + str(d_stcstc93) + " "
             if d_rsi14 != None:
-                sql = sql + "rsi14 = " = str(d_rsi14) + " "
+                sql = sql + "rsi14 = " + str(d_rsi14) + " "
             if d_evlp2065 != None:
-                sql = sql + "evlp2065 = " = str(d_evlp2065) + " "
+                sql = sql + "evlp2065 = " + str(d_evlp2065) + " "
             if d_cci14 != None:
-                sql = sql + "cci14 = " = str(d_cci14) + " "
+                sql = sql + "cci14 = " + str(d_cci14) + " "
             if d_dmi14 != None:
-                sql = sql + "dmi14 = " = str(d_dmi14) + " "
+                sql = sql + "dmi14 = " + str(d_dmi14) + " "
             if d_obv14 != None:
-                sql = sql + "obv14 = " = str(d_obv14) + " "
+                sql = sql + "obv14 = " + str(d_obv14) + " "
             if d_opinion != None:
-                sql = sql + "opinion = " = str(d_opinion) + " "
+                sql = sql + "opinion = " + str(d_opinion) + " "
             sql += "WHERE stockcode = \"" + str(stockcode) + "\""
             cursor.execute(sql)
             db.commit()

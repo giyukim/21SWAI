@@ -1,12 +1,6 @@
 from flask import Flask, Response, jsonify
 from flask_restx import Resource, Api
 import pymysql
-import os
-import datetime
-import random
-import hashlib
-
-from werkzeug.datastructures import ResponseCacheControl
 
 api_version = "V1"
 
@@ -22,7 +16,7 @@ cursor = db.cursor()
 app = Flask(__name__)
 api = Api(app)
 
-@api.route("/" + api_version + "/users?username=<str:username>&password=<str:password>&passwordconfirm=<str:password2")
+@api.route("/V1/users?username=<str:username>&password=<str:password>&passwordconfirm=<str:password2")
 class Users(Resource):
     def get(self, username, password):
         if username != "" and password != "":
@@ -85,7 +79,7 @@ class Users(Resource):
             }
             return Response(response = jsonify(return_json), status = 400)
 
-@api.route("/" + api_version + "/users/<int:userid>?username=<str:username>&password=<str:password>&passwordconfirm=<str:password2>")
+@api.route("/V1/users/<int:userid>?username=<str:username>&password=<str:password>&passwordconfirm=<str:password2>")
 class Usersid(Resource):
     def get(self, userid):
         sql = "SELECT EXISTS (SELECT username FROM users WHERE id = " + str(userid) + ")"
@@ -176,7 +170,7 @@ class Usersid(Resource):
         else:
             return Response(status = 404)
 
-@api.route("/" + api_version + "/users/<int:userid>/stocks")
+@api.route("/V1/users/<int:userid>/stocks")
 class Usersstocks(Resource):
     def get(self, userid):
         sql = "SELECT EXISTS (SELECT username FROM users WHERE id = " + str(userid) + ")"
@@ -204,7 +198,7 @@ class Usersstocks(Resource):
         else:
             return Response(status = 404)
 
-@api.route("/" + api_version +  "/users/<int:userid>/stocks/<str:stockcode>")
+@api.route("/V1/users/<int:userid>/stocks/<str:stockcode>")
 class Usersuseridstocksstockcode(Resource):
     def patch(self, userid, stockcode):
         if stockcode != "":
@@ -259,33 +253,39 @@ class Usersuseridstocksstockcode(Resource):
             }
             return Response(response = jsonify(return_json), status = 400)
 
-@api.route("/" + api_version + "/stocks")
+@api.route("/V1/stocks")
 class Stocks(Resource): 
     def get(self):
-        sql = "SELECT stockcode FROM stock_data"
+        sql = "SELECT EXISTS (SELECT stokcode FROM stock_data)"
         cursor.execute(sql)
-        result_data_stockcodelist = cursor.fetchall()
-        # stockcodelist
-        # if no stockcode in table
-        # return 204
-        return_json = {
+        result_data_stockcodelistexist = cursor.fetchall()[0][0]
+        if int(result_data_stockcodelistexist) == 0:
+            return Response(status = 404)
+        else:
+            sql = "SELECT stockcode FROM stock_data"
+            cursor.execute(sql)
+            result_data_stockcodelist = cursor.fetchall()[0][0]
+            return_json = {
+                "msg": "get stock lists test msg"
+            }
+            return Response(response = jsonify(return_json), status = 200)
 
-        }
-        return Response(response = jsonify(return_json), status = 200)
-
-@api.route("/" + api_version + "/stocks/<str:stockcode>?ml=<int:d_ml>&nlp=<int:d_nlp>&ma520=<float:d_ma520>&ma2060=<float:d_ma2060>&macd12269=<float:d_macd12269>&stcstc93=<float:d_stcstc93>&rsi14=<float:d_rsi14>&bb202=<float:d_bb202>&evlp2065=<float:d_evlp2065>&cci14=<float:d_cci14>&dmi14=<float:d_dmi14>&obv14=<float:d_obv14>&opinion=<int:d_opinion>")
+@api.route("/V1/stocks/<str:stockcode>?ml=<int:d_ml>&nlp=<int:d_nlp>&ma520=<float:d_ma520>&ma2060=<float:d_ma2060>&macd12269=<float:d_macd12269>&stcstc93=<float:d_stcstc93>&rsi14=<float:d_rsi14>&bb202=<float:d_bb202>&evlp2065=<float:d_evlp2065>&cci14=<float:d_cci14>&dmi14=<float:d_dmi14>&obv14=<float:d_obv14>&opinion=<int:d_opinion>")
 class Stockstockcode(Resource):
     def get(self, stockcode):
-        sql = "SELECT * FROM stock_data WHERE stockcode = \"" + str(stockcode) + "\""
+        sql = "SELECT EXISTS (SELECT id FROM stock_data WHERE stockcode = \"" + str(stockcode) + "\""
         cursor.execute(sql)
-        result_data_stockdata = cursor.fetchall()
-        # stock data anayze
-        # if no opinion in table
-        # return 204
-        return_json = {
-
-        }
-        return Response(resonpse = jsonify(return_json), status = 200)
+        result_data_stockdataexists = cursor.fetchall(0)[0][0]
+        if int(result_data_stockdataexists) == 0:
+            return Response(status = 404)
+        else:
+            sql = "SELECT * FROM stock_data WHERE stockcode = \"" + str(stockcode) + "\""
+            cursor.execute(sql)
+            result_data_stockdata = cursor.fetchall()[0][0]
+            return_json = {
+                "msg": "get stock datas test msg"
+            }
+            return Response(resonpse = jsonify(return_json), status = 200)
 
     def post(self, stockcode):
         sql = "SELECT EXISTS (SELECT id FROM stock_data WHERE stockcode = \"" + str(stockcode) + "\")"

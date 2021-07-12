@@ -16,7 +16,7 @@ cursor = db.cursor()
 app = Flask(__name__)
 api = Api(app)
 
-@api.route("/V1/users?username=<string:username>&password=<string:password>&passwordconfirm=<string:password2")
+@api.route("/V1/users?username=<string:username>&password=<string:password>&passwordconfirm=<string:password2>")
 class Users(Resource):
     def get(self, username, password):
         if username != "" and password != "":

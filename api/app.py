@@ -16,7 +16,7 @@ cursor = db.cursor()
 app = Flask(__name__)
 api = Api(app)
 
-@api.route("/V1/users?username=<str:username>&password=<str:password>&passwordconfirm=<str:password2")
+@api.route("/V1/users?username=<string:username>&password=<string:password>&passwordconfirm=<string:password2")
 class Users(Resource):
     def get(self, username, password):
         if username != "" and password != "":
@@ -79,7 +79,7 @@ class Users(Resource):
             }
             return Response(response = jsonify(return_json), status = 400)
 
-@api.route("/V1/users/<int:userid>?username=<str:username>&password=<str:password>&passwordconfirm=<str:password2>")
+@api.route("/V1/users/<int:userid>?username=<string:username>&password=<string:password>&passwordconfirm=<string:password2>")
 class Usersid(Resource):
     def get(self, userid):
         sql = "SELECT EXISTS (SELECT username FROM users WHERE id = " + str(userid) + ")"
@@ -198,7 +198,7 @@ class Usersstocks(Resource):
         else:
             return Response(status = 404)
 
-@api.route("/V1/users/<int:userid>/stocks/<str:stockcode>")
+@api.route("/V1/users/<int:userid>/stocks/<string:stockcode>")
 class Usersuseridstocksstockcode(Resource):
     def patch(self, userid, stockcode):
         if stockcode != "":
@@ -270,7 +270,7 @@ class Stocks(Resource):
             }
             return Response(response = jsonify(return_json), status = 200)
 
-@api.route("/V1/stocks/<str:stockcode>?ml=<int:d_ml>&nlp=<int:d_nlp>&ma520=<float:d_ma520>&ma2060=<float:d_ma2060>&macd12269=<float:d_macd12269>&stcstc93=<float:d_stcstc93>&rsi14=<float:d_rsi14>&bb202=<float:d_bb202>&evlp2065=<float:d_evlp2065>&cci14=<float:d_cci14>&dmi14=<float:d_dmi14>&obv14=<float:d_obv14>&opinion=<int:d_opinion>")
+@api.route("/V1/stocks/<string:stockcode>?ml=<int:d_ml>&nlp=<int:d_nlp>&ma520=<float:d_ma520>&ma2060=<float:d_ma2060>&macd12269=<float:d_macd12269>&stcstc93=<float:d_stcstc93>&rsi14=<float:d_rsi14>&bb202=<float:d_bb202>&evlp2065=<float:d_evlp2065>&cci14=<float:d_cci14>&dmi14=<float:d_dmi14>&obv14=<float:d_obv14>&opinion=<int:d_opinion>")
 class Stockstockcode(Resource):
     def get(self, stockcode):
         sql = "SELECT EXISTS (SELECT id FROM stock_data WHERE stockcode = \"" + str(stockcode) + "\""

@@ -8,7 +8,7 @@
 }
 
 .u-section-1 .u-text-1 {
-  font-size: 6rem;
+  font-size: 5rem;
   font-weight: 700;
   margin: 60px auto 0;
 }
@@ -23,6 +23,17 @@
   font-weight: 700;
   border-style: none;
   margin: 40px auto 60px;
+}
+
+p.u-large-text {
+  font-size: 2rem;
+  margin-top: 20px;
+  margin-bottom: 20px;
+}
+
+.u-footer .u-text-1 {
+  width: 900px;
+  margin: 49px auto;
 }
 
 @media (max-width: 1199px) {
